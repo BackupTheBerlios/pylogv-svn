@@ -15,6 +15,7 @@ import re
 import codecs
 import sys
 
+# TODO: USER OS.PATH.GETMTIME() !!!
 # TODO: use os.open and os.fstat to monitor log file access times
 # TODO: and os.ST_ATIME, os.ST_MTIME and os.ST_CTIME in particular
 # TODO:
