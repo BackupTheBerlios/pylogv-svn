@@ -22,6 +22,10 @@ import time
 from threading import Thread
 from threading import Event
 
+class Conf_Manager:
+  def __init__(self):
+    print "uh"
+
 class File_Monitor(Thread):
   def __init__(self, parent, pathname, poll_time, event):
     self.suspend = None
@@ -129,7 +133,9 @@ class PyLogV:
 
     self.event.set()
     # gnome/metacity doesn't like this with such a great poll time :S
-    self.fm.join()
+    for key, value in self.file_monitors.iteritems():
+      print "Waiting for '" + key + "' file monitor to stop"
+      value.join()
     return gtk.FALSE
 
   def destroy(self, widget, data=None):
@@ -223,8 +229,6 @@ class PyLogV:
       self.add_log_file_to_log_files(file)
     
     renderer = gtk.CellRendererText()
-    #renderer.set_property('xpad', 2)
-    #renderer.set_property('ypad', 2)
     column = gtk.TreeViewColumn("log_files", renderer, text=1)
     self.log_files.append_column(column)
     
@@ -237,11 +241,13 @@ class PyLogV:
     # setup file monitors assoc array
     self.file_monitors = {}
 
-    #for value in self.log_file_list:
-    # self.file_monitors[value] = self.start_file_monitor()
-    self.fm = self.start_file_monitor('/home/mano/teste.fam')
-    self.fm.start()
+    for value in self.log_file_list:
+      self.file_monitors[value] = self.start_file_monitor(value)
+      self.file_monitors[value].start()
 
+    #self.file_monitors['/home/mano/teste.fam'] = self.start_file_monitor('/home/mano/teste.fam')
+    #self.file_monitors['/home/mano/teste.fam'].start()
+      
 if __name__ == '__main__':
   gtk.gdk.threads_init()
   list = sys.argv[1:]
