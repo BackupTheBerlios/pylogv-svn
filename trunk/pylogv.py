@@ -18,36 +18,6 @@ import sys
 import _fam
 import threading
 
-class TaskThread(threading.Thread):
-    """Thread that executes a task every N seconds"""
-    
-    def __init__(self, poll_time):
-        threading.Thread.__init__(self)
-        self._finished = threading.Event()
-        self._interval = poll_time
-    
-    def setInterval(self, interval):
-        """Set the number of seconds we sleep between executing our task"""
-        self._interval = interval
-    
-    def shutdown(self):
-        """Stop this thread"""
-        self._finished.set()
-    
-    def run(self):
-        while 1:
-          gtk.gdk.threads_enter()
-          if self._finished.isSet(): return
-          self.task()
-          gtk.gdk.threads_leave()
-            
-          # sleep for interval or until shutdown
-          self._finished.wait(self._interval)
-    
-    def task(self):
-        """The task done by this thread - override in subclasses"""
-        pass
-        
 class File_Monitor(threading.Thread):
   def __init__(self, parent, pathname, poll_time):
     self.parent = parent
@@ -71,16 +41,17 @@ class File_Monitor(threading.Thread):
   def run(self):
     while 1:
       gtk.gdk.threads_enter()
-      if self._finished.isSet(): return
-      self.task()
+      
+      if self._finished.isSet():
+        return
+      
+      event = self.fam_conn.nextEvent()
+      print event.filename, event.code2str()
+      
       gtk.gdk.threads_leave()
         
       # sleep for interval or until shutdown
       self._finished.wait(self.poll_time)
-
-  def task(self):
-      event = self.fam_conn.nextEvent()
-      print event.filename, event.code2str()
 
 # TODO: USER OS.PATH.GETMTIME() !!!
 # TODO: use os.open and os.fstat to monitor log file access times
@@ -220,10 +191,10 @@ if __name__ == '__main__':
 # create the window
   window = PyLogV(list)
   
+  gtk.gdk.threads_init()
   gtk.gdk.threads_enter()
   fm = File_Monitor(window, "/home/mano/teste.fam", 4)
   fm.start()
   gtk.gdk.threads_leave()
 
-  gtk.gdk.threads_init()
   gtk.main()
