@@ -15,60 +15,82 @@ import gtk.glade
 import re
 import codecs
 import sys
+import os
+import signal
 import _fam
 import time
 from threading import Thread
+from threading import Event
 
 class File_Monitor(Thread):
-  def __init__(self, parent, pathname, poll_time):
+  def __init__(self, parent, pathname, poll_time, event):
+    self.suspend = None
+    self.cont = None
+    self.intr = None
+    self.usr1 = None
+    self.usr2 = None
+
+    self.event = event
+
     Thread.__init__(self)
     self.parent = parent
     self.pathname = pathname
     self.poll_time = poll_time
     self.fam_conn = _fam.open()
     self.request = self.fam_conn.monitorFile(self.pathname, None)
+    
+    signal.signal(signal.SIGTSTP, self.handle_stop)
+    signal.signal(signal.SIGCONT, self.handle_cont)
+    signal.signal(signal.SIGINT, self.handle_int)
+    signal.signal(signal.SIGUSR1, self.handle_usr1)
+    signal.signal(signal.SIGUSR2, self.handle_usr2)
 
-  def handle_stop(signum, frame):
-      global suspend
-      
+  def handle_stop(self, signum, frame):
       print 'Suspended!'
-      suspend = 1
+      self.suspend = 1
 
-  def handle_cont(signum, frame):
-      global cont
-      
+  def handle_cont(self, signum, frame):
       print 'Resumed!'
-      signal.signal(signal.SIGCONT, handle_cont)
-      cont = 1
+      signal.signal(signal.SIGCONT, self.handle_cont)
+      self.cont = 1
 
-  def handle_int(signum, frame):
-      global intr
-      
+  def handle_int(self, signum, frame):
       print 'Interupted!'
-      signal.signal(signal.SIGINT, handle_int)
-      intr = 1
+      signal.signal(signal.SIGINT, self.handle_int)
+      self.intr = 1
 
-  def handle_usr1(signum, frame):
-      global usr1
-      
+  def handle_usr1(self, signum, frame):
       print 'Got USR1!'
-      signal.signal(signal.SIGUSR1, handle_usr1)
-      usr1 = 1
+      signal.signal(signal.SIGUSR1, self.handle_usr1)
+      self.usr1 = 1
 
-  def handle_usr2(signum, frame):
-      global usr2
-      
+  def handle_usr2(self, signum, frame):
       print 'Got USR2!'
-      signal.signal(signal.SIGUSR2, handle_usr2)
-      usr2 = 1
+      signal.signal(signal.SIGUSR2, self.handle_usr2)
+      self.usr2 = 1
 
   def run(self):
-    #for i in range(0,10):
     while True:
+      # event set means main window closed
+      if self.event.isSet():
+        sys.exit(0)
+
+      if self.suspend:
+        self.fam_conn.suspendMonitor()
+        
+      if self.cont:
+        self.fam_conn.resumeMonitor()
+      
+      if self.intr:
+        sys.exit(0)
+      
       time.sleep(self.poll_time)
+      
       print "ola"
-      #event = self.fam_conn.nextEvent()
-      #print event.filename, event.code2str()
+      
+      while self.fam_conn.pending():
+        event = self.fam_conn.nextEvent()
+        print event.filename, event.code2str()
 
 # TODO: USER OS.PATH.GETMTIME() !!!
 # TODO: use os.open and os.fstat to monitor log file access times
@@ -79,7 +101,7 @@ class File_Monitor(Thread):
 
 class PyLogV:
   def start_file_monitor(self):
-    self.fm = File_Monitor(self, "/home/mano/teste.fam", 4)
+    self.fm = File_Monitor(self, "/home/mano/teste.fam", 4, self.event)
     self.fm.start()
 
   def add_text(self, text):
@@ -105,6 +127,8 @@ class PyLogV:
     
     # Change TRUE to FALSE and the main window will be destroyed with
     # a "delete_event".
+
+    self.event.set()
     return gtk.FALSE
 
   def destroy(self, widget, data=None):
@@ -204,6 +228,9 @@ class PyLogV:
     f = self.open_file("/var/log/errors")
     self.add_text(self.get_text_from_file(f))
 
+    # setup communication with file monitor
+    self.event = Event()
+    
     self.start_file_monitor()
 
 if __name__ == '__main__':
