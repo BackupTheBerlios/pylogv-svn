@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*
 
 import sys, os.path, codecs
+from xml.dom import minidom
 
 class Conf_Manager:
   # poll_time
@@ -29,7 +30,8 @@ class Conf_Manager:
 
   def open(self):
     # open for reading and writing but no truncating
-    self.fd = codecs.open(self.pathname, 'r+', 'ascii')
+    #self.fd = codecs.open(self.pathname, 'r+', 'ascii')
+    self.xml = minidom.parse(self.pathname)
 
   def read_lines(self):
     return self.fd.readlines()
@@ -48,3 +50,5 @@ class Conf_Manager:
 if __name__ == '__main__':
   c = Conf_Manager('/home/mano/.pylogvrc')
   print c.exists()
+  ref = c.xml.getElementsByTagName('ref')[0]
+  print ref.getElementsByTagName('p')[1]
