@@ -17,14 +17,11 @@ import sys
 
 class PyLogV:
   def add_text(self, text):
-    #iter = self.text_buffer.get_start_iter()
-    #self.text_buffer.insert(iter, text)
-    #u = unicode(text, "utf-8")
-    #text2 = u.encode("utf-8")
     self.text_buffer.insert_at_cursor(text)
+    #self.parvo = self.parvo + 1
+    #self.show_logs_model.append([self.parvo, text])
     
   def open_file(self, filename):
-    #f = open(filename, 'r')
     f = codecs.open(filename, "r", "ascii")
     return f
   
@@ -37,7 +34,6 @@ class PyLogV:
     # you don't want the window to be destroyed.
     # This is useful for popping up 'are you sure you want to quit?'
     # type dialogs.
-    #print "delete event occurred"
     
     # Change TRUE to FALSE and the main window will be destroyed with
     # a "delete_event".
@@ -84,6 +80,7 @@ class PyLogV:
   def __init__(self, log_file_list):
     # parse the glade file
     self.all_widgets = gtk.glade.XML("pylogv.glade")
+    self.parvo = 1
     self.estupido = 1
     
     # save the log_file_list if present in args
@@ -102,7 +99,6 @@ class PyLogV:
     self.quit_menu_item = self.all_widgets.get_widget("sair1")
     self.quit_menu_item.connect("activate", self.destroy)
 
-    #self.filechooser.hide()
     self.add_button = self.all_widgets.get_widget("add")
     self.remove_button = self.all_widgets.get_widget("remove")
     self.browse_button = self.all_widgets.get_widget("browse")
@@ -114,38 +110,31 @@ class PyLogV:
     
     self.text_view = self.all_widgets.get_widget("textview")
     self.text_buffer = self.text_view.get_buffer()
+    
+    #self.show_logs = self.all_widgets.get_widget("show_logs")
+    #self.show_logs_model = gtk.ListStore(gobject.TYPE_INT, gobject.TYPE_STRING)
+    #self.show_logs.set_model(self.show_logs_model)
+    #renderer2 = gtk.CellRendererText()
+    #column2 = gtk.TreeViewColumn("logs", renderer2, text=1)
+    #self.show_logs.append_column(column2)
 
     self.entry = self.all_widgets.get_widget("entry")
     
     self.log_files = self.all_widgets.get_widget("log_files")
 
     self.log_files_model = gtk.ListStore(gobject.TYPE_INT, gobject.TYPE_STRING)
-    #iter = model.insert_before(None, None)
-    #iter = None
-    #self.log_files_model.append(iter)
-    #iter = self.log_files_model.insert_before(None, None)
-    #self.log_files_model.set_value(iter, 0, "ola")
-    
     self.log_files.set_model(self.log_files_model)
 
     # add the files passed to monitor list
     for file in self.log_file_list:
       self.add_log_file_to_log_files(file)
-
     
     renderer = gtk.CellRendererText()
     column = gtk.TreeViewColumn("log_files", renderer, text=1)
     self.log_files.append_column(column)
-
-    self.location = "undefined"
-    self.color = gtk.gdk.Color(0, 0, 0)
-    
     
     f = self.open_file("/var/log/errors")
-    self.text = self.get_text_from_file(f)
-    #print self.text
-    self.add_text(self.text)
-
+    self.add_text(self.get_text_from_file(f))
 
 if __name__ == '__main__':
   list = []

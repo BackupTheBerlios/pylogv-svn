@@ -10,7 +10,7 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
-  <property name="default_width">540</property>
+  <property name="default_width">800</property>
   <property name="default_height">540</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
@@ -234,18 +234,16 @@
 	  <property name="enable_popup">False</property>
 
 	  <child>
-	    <widget class="GtkScrolledWindow" id="scrolledwindow">
-	      <property name="border_width">3</property>
+	    <widget class="GtkScrolledWindow" id="scrolledwindow2">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="hscrollbar_policy">GTK_POLICY_ALWAYS</property>
 	      <property name="vscrollbar_policy">GTK_POLICY_ALWAYS</property>
-	      <property name="shadow_type">GTK_SHADOW_NONE</property>
+	      <property name="shadow_type">GTK_SHADOW_IN</property>
 	      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 	      <child>
 		<widget class="GtkTextView" id="textview">
-		  <property name="border_width">3</property>
 		  <property name="visible">True</property>
 		  <property name="can_focus">True</property>
 		  <property name="editable">False</property>
@@ -256,7 +254,7 @@
 		  <property name="cursor_visible">False</property>
 		  <property name="pixels_above_lines">0</property>
 		  <property name="pixels_below_lines">0</property>
-		  <property name="pixels_inside_wrap">2</property>
+		  <property name="pixels_inside_wrap">0</property>
 		  <property name="left_margin">0</property>
 		  <property name="right_margin">0</property>
 		  <property name="indent">0</property>
