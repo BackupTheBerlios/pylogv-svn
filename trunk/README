@@ -1,0 +1,4 @@
+PyLogV is an application to ease the more common user of a *nix desktop to monitor error and 
+system messages by displaying them in a GTK window using GTK's Python bindings.
+
+see http://pylogv.berlios.de
