@@ -19,13 +19,30 @@ import os
 import signal
 import _fam
 import time
+#import xml.dom.minidom
 from threading import Thread
 from threading import Event
 
 class Conf_Manager:
-  def __init__(self):
-    print "uh"
+  # poll_time
+  # file1
+  # file2
+  # file3 ...
+  def __init__(self, pathname):
+    self.pathname = pathname
+    self.poll_time = 1 # default
+    self.log_file_list = []
 
+  def open(self):
+    # open for reading and writing but no truncating
+    f = codecs.open(self.pathname, "r+", "ascii")
+    return f
+
+  def exists(self):
+    ret = os.path.exists(self.pathname) and
+    os.path.isfile(self.pathname)
+    return ret
+    
 class File_Monitor(Thread):
   def __init__(self, parent, pathname, poll_time, event):
     self.suspend = None
