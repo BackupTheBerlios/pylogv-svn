@@ -247,7 +247,22 @@ class PyLogV:
 
     #self.file_monitors['/home/mano/teste.fam'] = self.start_file_monitor('/home/mano/teste.fam')
     #self.file_monitors['/home/mano/teste.fam'].start()
-      
+
+   #try:
+   #    opts, args = getopt.getopt(argv, "hg:s", ["help", "grammar="])
+   #except getopt.GetoptError:
+   #    usage()
+   #    sys.exit(2)
+   #for opt, arg in opts:
+   #    if opt in ("-h", "--help"):
+   #        usage()
+   #        sys.exit()
+   #    elif opt == '-d':
+   #        global _debug
+   #        _debug = 1
+   #    elif opt in ("-g", "--grammar"):
+   #        grammar = arg
+   #  
 if __name__ == '__main__':
   gtk.gdk.threads_init()
   list = sys.argv[1:]
