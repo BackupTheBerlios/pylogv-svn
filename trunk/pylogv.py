@@ -47,7 +47,11 @@ class File_Monitor(Thread):
     signal.signal(signal.SIGUSR1, self.handle_usr1)
     signal.signal(signal.SIGUSR2, self.handle_usr2)
 
-    conf_mgr = Conf_Manager('~/.pylogvrc')
+    default =  """poll_time=1
+file=/var/log/errors
+file=/var/log/messages"""
+
+    conf_mgr = Conf_Manager('~/.pylogvrc', default)
 
   def handle_stop(self, signum, frame):
       print 'Suspended!'
