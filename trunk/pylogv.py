@@ -5,6 +5,7 @@ import pygtk
 pygtk.require('2.0')
 
 import gobject
+import gtk.gdk
 import gtk
 if gtk.pygtk_version < (2,3,90):
   print "PyGtk 2.3.90 or later required for this example"
@@ -14,6 +15,72 @@ import gtk.glade
 import re
 import codecs
 import sys
+import _fam
+import threading
+
+class TaskThread(threading.Thread):
+    """Thread that executes a task every N seconds"""
+    
+    def __init__(self, poll_time):
+        threading.Thread.__init__(self)
+        self._finished = threading.Event()
+        self._interval = poll_time
+    
+    def setInterval(self, interval):
+        """Set the number of seconds we sleep between executing our task"""
+        self._interval = interval
+    
+    def shutdown(self):
+        """Stop this thread"""
+        self._finished.set()
+    
+    def run(self):
+        while 1:
+          gtk.gdk.threads_enter()
+          if self._finished.isSet(): return
+          self.task()
+          gtk.gdk.threads_leave()
+            
+          # sleep for interval or until shutdown
+          self._finished.wait(self._interval)
+    
+    def task(self):
+        """The task done by this thread - override in subclasses"""
+        pass
+        
+class File_Monitor(threading.Thread):
+  def __init__(self, parent, pathname, poll_time):
+    self.parent = parent
+    self.pathname = pathname
+    self.poll_time = poll_time
+    self.fam_conn = _fam.open()
+    self.request = self.fam_conn.monitorFile(pathname, None)
+    
+    #TaskThread.__init__(self, self.poll_time)
+    self._finished = threading.Event()
+    threading.Thread.__init__(self)
+    
+    print "Monitoring " + pathname
+
+  def set_poll_time(self, new_poll_time):
+    self.poll_time = new_poll_time
+
+  def get_poll_time(self):
+    return self.poll_time
+
+  def run(self):
+    while 1:
+      gtk.gdk.threads_enter()
+      if self._finished.isSet(): return
+      self.task()
+      gtk.gdk.threads_leave()
+        
+      # sleep for interval or until shutdown
+      self._finished.wait(self.poll_time)
+
+  def task(self):
+      event = self.fam_conn.nextEvent()
+      print event.filename, event.code2str()
 
 # TODO: USER OS.PATH.GETMTIME() !!!
 # TODO: use os.open and os.fstat to monitor log file access times
@@ -34,6 +101,10 @@ class PyLogV:
   
   def get_text_from_file(self, f):
     return f.read()
+  
+  def preferences_delete_event(self, widget, event, data=None):
+    self.preferences.hide()
+    return gtk.TRUE
 
   def delete_event(self, widget, event, data=None):
     # If you return FALSE in the "delete_event" signal handler,
@@ -93,7 +164,6 @@ class PyLogV:
     # save the log_file_list if present in args
     self.log_file_list = log_file_list
     # get the widgets
-
     # window stuff
     self.main_window = self.all_widgets.get_widget("mainwindow")
     self.main_window.connect("delete_event", self.delete_event)
@@ -114,6 +184,7 @@ class PyLogV:
 
     self.preferences = self.all_widgets.get_widget("preferences")
     self.preferences.hide()
+    self.preferences.connect("delete_event", self.preferences_delete_event)
     
     self.text_view = self.all_widgets.get_widget("textview")
     self.text_buffer = self.text_view.get_buffer()
@@ -148,5 +219,11 @@ if __name__ == '__main__':
   list = sys.argv[1:]
 # create the window
   window = PyLogV(list)
+  
+  gtk.gdk.threads_enter()
+  fm = File_Monitor(window, "/home/mano/teste.fam", 4)
+  fm.start()
+  gtk.gdk.threads_leave()
 
+  gtk.gdk.threads_init()
   gtk.main()
