@@ -16,42 +16,59 @@ import re
 import codecs
 import sys
 import _fam
-import threading
+import time
+from threading import Thread
 
-class File_Monitor(threading.Thread):
+class File_Monitor(Thread):
   def __init__(self, parent, pathname, poll_time):
+    Thread.__init__(self)
     self.parent = parent
     self.pathname = pathname
     self.poll_time = poll_time
     self.fam_conn = _fam.open()
-    self.request = self.fam_conn.monitorFile(pathname, None)
-    
-    #TaskThread.__init__(self, self.poll_time)
-    self._finished = threading.Event()
-    threading.Thread.__init__(self)
-    
-    print "Monitoring " + pathname
+    self.request = self.fam_conn.monitorFile(self.pathname, None)
 
-  def set_poll_time(self, new_poll_time):
-    self.poll_time = new_poll_time
+  def handle_stop(signum, frame):
+      global suspend
+      
+      print 'Suspended!'
+      suspend = 1
 
-  def get_poll_time(self):
-    return self.poll_time
+  def handle_cont(signum, frame):
+      global cont
+      
+      print 'Resumed!'
+      signal.signal(signal.SIGCONT, handle_cont)
+      cont = 1
+
+  def handle_int(signum, frame):
+      global intr
+      
+      print 'Interupted!'
+      signal.signal(signal.SIGINT, handle_int)
+      intr = 1
+
+  def handle_usr1(signum, frame):
+      global usr1
+      
+      print 'Got USR1!'
+      signal.signal(signal.SIGUSR1, handle_usr1)
+      usr1 = 1
+
+  def handle_usr2(signum, frame):
+      global usr2
+      
+      print 'Got USR2!'
+      signal.signal(signal.SIGUSR2, handle_usr2)
+      usr2 = 1
 
   def run(self):
-    while 1:
-      gtk.gdk.threads_enter()
-      
-      if self._finished.isSet():
-        return
-      
-      event = self.fam_conn.nextEvent()
-      print event.filename, event.code2str()
-      
-      gtk.gdk.threads_leave()
-        
-      # sleep for interval or until shutdown
-      self._finished.wait(self.poll_time)
+    #for i in range(0,10):
+    while True:
+      time.sleep(self.poll_time)
+      print "ola"
+      #event = self.fam_conn.nextEvent()
+      #print event.filename, event.code2str()
 
 # TODO: USER OS.PATH.GETMTIME() !!!
 # TODO: use os.open and os.fstat to monitor log file access times
@@ -61,10 +78,12 @@ class File_Monitor(threading.Thread):
 # TODO: convert from fstat to long format and compare
 
 class PyLogV:
+  def start_file_monitor(self):
+    self.fm = File_Monitor(self, "/home/mano/teste.fam", 4)
+    self.fm.start()
+
   def add_text(self, text):
     self.text_buffer.insert_at_cursor(text)
-    #self.parvo = self.parvo + 1
-    #self.show_logs_model.append([self.parvo, text])
     
   def open_file(self, filename):
     f = codecs.open(filename, "r", "ascii")
@@ -185,16 +204,14 @@ class PyLogV:
     f = self.open_file("/var/log/errors")
     self.add_text(self.get_text_from_file(f))
 
+    self.start_file_monitor()
+
 if __name__ == '__main__':
-  list = []
+  gtk.gdk.threads_init()
   list = sys.argv[1:]
 # create the window
   window = PyLogV(list)
-  
-  gtk.gdk.threads_init()
-  gtk.gdk.threads_enter()
-  fm = File_Monitor(window, "/home/mano/teste.fam", 4)
-  fm.start()
-  gtk.gdk.threads_leave()
 
+  gtk.gdk.threads_enter()
   gtk.main()
+  gtk.gdk.threads_leave()
