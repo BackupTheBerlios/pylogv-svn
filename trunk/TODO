@@ -1,0 +1,3 @@
+When doing any threaded programming, just remember that you need to
+surround gtk calls in other threads with threads_enter() and
+threads_leave(), otherwise bad things happen in gtk.
