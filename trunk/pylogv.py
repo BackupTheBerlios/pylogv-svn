@@ -128,16 +128,16 @@ class PyLogV:
     
     self.log_files = self.all_widgets.get_widget("log_files")
 
-    model = gtk.ListStore(gobject.TYPE_INT, gobject.TYPE_STRING)
-    model.append([1, "um"])
-    model.append([2, "dois"])
+    self.log_files_model = gtk.ListStore(gobject.TYPE_INT, gobject.TYPE_STRING)
+    self.log_files_model.append([1, "um"])
+    self.log_files_model.append([2, "dois"])
     #iter = model.insert_before(None, None)
     #iter = None
     #self.log_files_model.append(iter)
     #iter = self.log_files_model.insert_before(None, None)
     #self.log_files_model.set_value(iter, 0, "ola")
     
-    #self.log_files.set_model(self.log_files_model)
+    self.log_files.set_model(self.log_files_model)
     
     renderer = gtk.CellRendererText()
     column = gtk.TreeViewColumn("log_files", renderer, text=1)
