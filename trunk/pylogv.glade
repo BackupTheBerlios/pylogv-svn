@@ -307,7 +307,7 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_CENTER</property>
   <property name="modal">False</property>
-  <property name="default_width">460</property>
+  <property name="default_width">620</property>
   <property name="default_height">320</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
@@ -418,11 +418,11 @@
 		      <property name="spacing">0</property>
 
 		      <child>
-			<widget class="GtkButton" id="browse">
+			<widget class="GtkButton" id="add">
 			  <property name="visible">True</property>
 			  <property name="can_focus">True</property>
-			  <property name="label" translatable="yes">Browse</property>
-			  <property name="use_underline">True</property>
+			  <property name="label">gtk-add</property>
+			  <property name="use_stock">True</property>
 			  <property name="relief">GTK_RELIEF_NORMAL</property>
 			  <property name="focus_on_click">True</property>
 			</widget>
@@ -434,11 +434,11 @@
 		      </child>
 
 		      <child>
-			<widget class="GtkButton" id="add">
+			<widget class="GtkButton" id="browse">
 			  <property name="visible">True</property>
 			  <property name="can_focus">True</property>
-			  <property name="label" translatable="yes">Add</property>
-			  <property name="use_underline">True</property>
+			  <property name="label">gtk-open</property>
+			  <property name="use_stock">True</property>
 			  <property name="relief">GTK_RELIEF_NORMAL</property>
 			  <property name="focus_on_click">True</property>
 			</widget>
@@ -453,8 +453,8 @@
 			<widget class="GtkButton" id="remove">
 			  <property name="visible">True</property>
 			  <property name="can_focus">True</property>
-			  <property name="label" translatable="yes">Remove</property>
-			  <property name="use_underline">True</property>
+			  <property name="label">gtk-remove</property>
+			  <property name="use_stock">True</property>
 			  <property name="relief">GTK_RELIEF_NORMAL</property>
 			  <property name="focus_on_click">True</property>
 			</widget>

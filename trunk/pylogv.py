@@ -75,28 +75,19 @@ class PyLogV:
       print 'closed, nothing selected'
     fc.destroy()
 
-    print self.filename
+    self.add_log_file_to_log_files(self.filename)
 
-  def add_log_file_to_log_files(self, event, data=None):
-    log_file = entry.get_text()
+  def add_log_file_to_log_files(self, log_file):
+    self.estupido = self.estupido + 1
+    self.log_files_model.append([self.estupido, log_file])
 
-    
-    
-  #def populate_log_files_text_view(self, event, data=None):
-    #print self.log_file_list
-    #for value in self.log_file_list:
-    #  #print value
-    #  text = value + '\n'
-    #  self.log_files_text_buffer.insert_at_cursor(text)
-
-    
   def __init__(self, log_file_list):
     # parse the glade file
     self.all_widgets = gtk.glade.XML("pylogv.glade")
+    self.estupido = 1
     
     # save the log_file_list if present in args
     self.log_file_list = log_file_list
-
     # get the widgets
 
     # window stuff
@@ -129,8 +120,6 @@ class PyLogV:
     self.log_files = self.all_widgets.get_widget("log_files")
 
     self.log_files_model = gtk.ListStore(gobject.TYPE_INT, gobject.TYPE_STRING)
-    self.log_files_model.append([1, "um"])
-    self.log_files_model.append([2, "dois"])
     #iter = model.insert_before(None, None)
     #iter = None
     #self.log_files_model.append(iter)
@@ -138,6 +127,11 @@ class PyLogV:
     #self.log_files_model.set_value(iter, 0, "ola")
     
     self.log_files.set_model(self.log_files_model)
+
+    # add the files passed to monitor list
+    for file in self.log_file_list:
+      self.add_log_file_to_log_files(file)
+
     
     renderer = gtk.CellRendererText()
     column = gtk.TreeViewColumn("log_files", renderer, text=1)
