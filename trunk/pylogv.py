@@ -15,6 +15,12 @@ import re
 import codecs
 import sys
 
+# TODO: use os.open and os.fstat to monitor log file access times
+# TODO: and os.ST_ATIME, os.ST_MTIME and os.ST_CTIME in particular
+# TODO:
+# TODO: use time module to get current time -- perhaps time.time() and
+# TODO: convert from fstat to long format and compare
+
 class PyLogV:
   def add_text(self, text):
     self.text_buffer.insert_at_cursor(text)
