@@ -39,8 +39,8 @@ class Conf_Manager:
     return f
 
   def exists(self):
-    ret = os.path.exists(self.pathname) and
-    os.path.isfile(self.pathname)
+    ret = (os.path.exists(self.pathname) and
+    os.path.isfile(self.pathname))
     return ret
     
 class File_Monitor(Thread):
