@@ -86,8 +86,6 @@ class File_Monitor(Thread):
       
       time.sleep(self.poll_time)
       
-      print "ola"
-      
       while self.fam_conn.pending():
         event = self.fam_conn.nextEvent()
         print event.filename, event.code2str()
@@ -100,9 +98,10 @@ class File_Monitor(Thread):
 # TODO: convert from fstat to long format and compare
 
 class PyLogV:
-  def start_file_monitor(self):
-    self.fm = File_Monitor(self, "/home/mano/teste.fam", 4, self.event)
-    self.fm.start()
+  def start_file_monitor(self, pathname):
+    fm = File_Monitor(self, pathname, 0.6, self.event)
+    #fm.start()
+    return fm
 
   def add_text(self, text):
     self.text_buffer.insert_at_cursor(text)
@@ -129,6 +128,8 @@ class PyLogV:
     # a "delete_event".
 
     self.event.set()
+    # gnome/metacity doesn't like this with such a great poll time :S
+    self.fm.join()
     return gtk.FALSE
 
   def destroy(self, widget, data=None):
@@ -222,6 +223,8 @@ class PyLogV:
       self.add_log_file_to_log_files(file)
     
     renderer = gtk.CellRendererText()
+    #renderer.set_property('xpad', 2)
+    #renderer.set_property('ypad', 2)
     column = gtk.TreeViewColumn("log_files", renderer, text=1)
     self.log_files.append_column(column)
     
@@ -231,7 +234,13 @@ class PyLogV:
     # setup communication with file monitor
     self.event = Event()
     
-    self.start_file_monitor()
+    # setup file monitors assoc array
+    self.file_monitors = {}
+
+    #for value in self.log_file_list:
+    # self.file_monitors[value] = self.start_file_monitor()
+    self.fm = self.start_file_monitor('/home/mano/teste.fam')
+    self.fm.start()
 
 if __name__ == '__main__':
   gtk.gdk.threads_init()
